@@ -1,35 +1,39 @@
 import numpy as np
-from functools import reduce
-import math
+from . import Dcg
 
-class FullyConnect(object):
-    def __init__(self, shape, output_num=10):
-        self.input_shape = tuple(map(int, shape))
-        self.output_shape = [output_num]
-        self.output_channel = output_num
-        input_len = reduce(lambda x,y:x*y, shape[:]) #shape 이 몇차원일지 모를때 사용
+class fullyconnect:
+    '''
+    fully-connected layer
+    '''
+    def __init__(self, input_node, output_node):
+        '''
+        get instance of DCG and init pramters
+        '''
+        self.w = np.random.rand(input_node, output_node) - 0.5
+        self.b = np.random.rand(output_node) - 0.5
+        self.dcg = Dcg.DCG.getDCG()
 
-        self.weights = np.random.standard_normal((int(input_len), output_num))
-        self.bias = np.random.standard_normal(output_num)
-        self.w_gradient = np.zeros(self.weights.shape)
-        self.b_gradient = np.zeros(self.bias.shape)
+    def __call__(self, *args, **kwargs):
+        '''
+        args[0] is 2 dimension when model is batch-mode
+        '''
+        return self.forward(args)
 
-    def forward(self, x):
-        self.x = np.reshape(x.reshape(-1), (1, -1))
-        output = np.dot(self.x, self.weights)
-        for b in range(self.output_channel):
-            output[0][b] += self.bias[b]
+    def forward(self, data):
+        '''
+        feed forward and store input data and backward function to DCG
+        '''
+        data = np.reshape(data, (1, -1))
+        tmp = Dcg.node(data)
+        tmp.function = self.backward
+        self.dcg.append(tmp)
+        output = np.dot(data, self.w) + self.b
         return output
 
-    def backward(self, gradient):
-        self.w_gradient = np.dot(self.x.T, np.reshape(gradient, (1, 10)))
-        self.b_gradient = gradient
-        next_gradient = np.dot(gradient, self.weights.T)
-        next_gradient = np.reshape(next_gradient, self.input_shape)
-        return next_gradient
-
-    def update(self, learning_rate = 0.01):
-        self.weights -= self.w_gradient * learning_rate
-        self.bias -=learning_rate * np.reshape(self.b_gradient, (-1))
-        self.w_gradient = np.zeros(self.weights.shape)
-        self.b_gradient = np.zeros(self.bias.shape)
+    def backward(self, input, gradient):
+        dw = np.dot(np.reshape(input, (-1, 1)), gradient)
+        db = gradient
+        gradient = np.dot(gradient, self.w.T)
+        self.w = self.w - 0.01 * dw  # change lr in optimizer class
+        self.b = self.b - 0.01 * db
+        return gradient

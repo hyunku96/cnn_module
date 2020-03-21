@@ -1,12 +1,15 @@
 import numpy as np
 from . import Dcg
 
-class relu:
+class leaky_relu:
     '''
     ReLU activation function
     '''
-    def __call__(self, *args, **kwargs):
+    def __init__(self, alpha):
+        self.alpha = alpha
         self.dcg = Dcg.DCG.getDCG()
+
+    def __call__(self, *args, **kwargs):
         return self.forward(args[0])
 
     def forward(self, data):
@@ -16,8 +19,14 @@ class relu:
         tmp = Dcg.node(data)
         tmp.function = self.backward
         self.dcg.append(tmp)
-        return np.maximum(0, data)
+        return np.maximum(data * self.alpha, data)
 
     def backward(self, input, gradient):
-        gradient[input < 0] = 0
-        return gradient
+        '''
+        using numpy boolean indexing(making mask)
+        '''
+        mask = input
+        mask[mask > 0] = 1
+        mask[mask < 0] = self.alpha
+        mask = gradient * mask
+        return mask

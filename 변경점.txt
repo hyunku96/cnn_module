@@ -1,0 +1,13 @@
+2020-03-21
+1. nn 파일 삭제 후 layers 폴더에 layer들(activation function, loss function까지) 넣어둠
+2. Loader는 utils 폴더에 넣어둠
+3. Loader의 path를 상대경로로 지정
+- 실행 파일(MNIST_2layer mlp)의 위치가 달라지면(폴더 이동 등) 경로를 수정해 줘야되네?
+4. 파일명은 대문자로 시작, 내부 클래스(메소드 처럼 사용)는 소문자로 명명
+- (DCG, MSE, BCE 등은 예외)
+5. dynamic computational graph(DCG)를 싱글턴으로 구현함.
+- optimizer도 싱글턴으로 구현할 수 있을듯? gradient만 넘기고 받는 형식으로
+6. fullyconnect, conv layer의 input size parameter를 삭제함
+- optimizer를 싱글턴으로 구현할 수 있다면, layer에 input을 특정할 필요 없지 않을까?
+*maxpooling, fullyconnect를 내(강현구)걸로 바꿈(성능 동일). softmax는 모르겠다
+

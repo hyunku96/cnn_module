@@ -1,6 +1,9 @@
 import numpy as np
 
-class Softmax(object):
+class softmax(object):
+    def __call__(self, *args, **kwargs):
+        return self.predict(args[0])
+
     def predict(self, prediction, label):
         self.label = label
         exp_prediction = np.zeros(prediction.shape)
@@ -9,7 +12,6 @@ class Softmax(object):
         exp_prediction = np.exp(prediction)
         self.softmax = exp_prediction / np.sum(exp_prediction)
         return self.softmax
-
 
     def backward(self):
         gradient = self.softmax.copy()
