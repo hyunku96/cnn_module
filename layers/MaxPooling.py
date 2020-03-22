@@ -67,7 +67,7 @@ class maxpooling:
             result.append(np.reshape(out, (int(input.shape[1] / self.h_size), int(input.shape[2] / self.w_size))))
         return result
 
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer=None):
         gradient = np.reshape(gradient,
                               (input.shape[0], int(input.shape[1] / self.h_size), int(input.shape[2] / self.w_size)))
         mask = np.zeros((input.shape[0], input.shape[1], input.shape[2]))

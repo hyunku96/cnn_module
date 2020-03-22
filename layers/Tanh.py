@@ -19,6 +19,6 @@ class tanh:
         self.dcg.append(tmp)
         return np.tanh(tmp.data)
 
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer=None):
         gradient = (1 - np.tanh(input)) * (1 + np.tanh(input)) * gradient
         return gradient

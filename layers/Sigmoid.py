@@ -13,6 +13,7 @@ class sigmoid:
         '''
         forward adds dcg nodes so i split forward & sigmoid method
         '''
+        x = np.clip(x, -100, None)
         return 1 / (1 + np.exp(-x))
 
     def forward(self, data):
@@ -24,6 +25,6 @@ class sigmoid:
         self.dcg.append(tmp)
         return self.sigmoid(tmp.data)
 
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer=None):
         gradient = self.sigmoid(input) * (1 - self.sigmoid(input)) * gradient
         return gradient

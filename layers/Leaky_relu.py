@@ -21,7 +21,7 @@ class leaky_relu:
         self.dcg.append(tmp)
         return np.maximum(data * self.alpha, data)
 
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer=None):
         '''
         using numpy boolean indexing(making mask)
         '''

@@ -6,6 +6,7 @@ from layers.MaxPooling import maxpooling
 from layers.Sigmoid import sigmoid
 from layers.Relu import relu
 from layers.MSE import MSE
+from optimizers.SGD import SGD
 from layers.Dcg import zero_grad
 from utils.LoadData import get_MNIST
 
@@ -34,6 +35,7 @@ TrainImg, TrainLabel, TestImg, TestLabel = get_MNIST()
 
 # train model
 model = net()
+optimizer = SGD(lr=0.01)
 for epoch in range(100):
     zero_grad()
     indexes = np.random.permutation(len(TrainLabel))
@@ -41,9 +43,8 @@ for epoch in range(100):
         img = TrainImg[index]
         output = model.forward(img)
         label = TrainLabel[index]
-        loss = MSE(output, label)
+        loss = MSE(output, label, optimizer)
         loss.backward()
-        #optimizer.step() <- not yet
 
     # test model
     acc = 0

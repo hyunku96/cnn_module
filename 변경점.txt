@@ -11,3 +11,10 @@
 - optimizer를 싱글턴으로 구현할 수 있다면, layer에 input을 특정할 필요 없지 않을까?
 *maxpooling, fullyconnect를 내(강현구)걸로 바꿈(성능 동일). softmax는 모르겠다
 
+2020-03-22
+1. convolution layer의 bias를 vector(channel) -> tensor(channel, height, width) 로 변경
+2. optimizer.SGD class 구현(callable, gradient를 받고 learning rate 곱해서 return)
+- 사용자가 optimizer 객체 선언하고, 이후 loss function에서 인자로 넣어줌
+3. Loss function instance 선언할 때 optimizer를 인자로 넣어 주어야 함
+4. 모든 layer의 backward에 optimizer를 추가함
+5. gan.py 추가

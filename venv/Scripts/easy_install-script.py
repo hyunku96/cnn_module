@@ -1,4 +1,4 @@
-#!C:\Users\20151\PycharmProjects\numPytorch\venv\Scripts\python.exe
+#!C:\Users\khk\Desktop\cnn_module\venv\Scripts\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'setuptools==40.8.0','console_scripts','easy_install'
 __requires__ = 'setuptools==40.8.0'
 import re

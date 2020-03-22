@@ -6,9 +6,10 @@ class BCE:
     Binary Closs Entropy loss function
     compute BCE and initiate back propagation
     '''
-    def __init__(self, output, label):
+    def __init__(self, output, label, optimizer):
         self.output = np.clip(output, 1e-10, 1-1e-10)
         self.label = label
+        self.optim = optimizer
         self.dcg = Dcg.DCG.getDCG()
 
     def backward(self):
@@ -30,7 +31,7 @@ class BCE:
         else:
             loss = (1 - self.label)/(1 - self.output) - self.label / self.output
             tmp = self.dcg.pop()
-            gradient = tmp.function(tmp.data, loss)
+            gradient = tmp.function(tmp.data, loss, self.optim)
             while self.dcg.len() > 0:
                 tmp = self.dcg.pop()
-                gradient = tmp.function(tmp.data, gradient)
+                gradient = tmp.function(tmp.data, gradient, self.optim)

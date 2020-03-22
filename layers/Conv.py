@@ -13,6 +13,7 @@ class conv(object):
         self.stride = stride
         self.padding_size = padding_size
         self.weights, self.bias = None, None
+        self.dw, self.db = None, None
         self.dcg = Dcg.DCG.getDCG()
 
     def __call__(self, *args, **kwargs):
@@ -20,14 +21,17 @@ class conv(object):
         args[0].shape[0, 1, 2] : depth, height, width of input
         args[0] is 4 dimension when model is batch-mode
         self.k : layer's kernel - 4 dimension(kernel num, input depth, kernel height, kernel width)
-        self.b : layer's bias - 2 dimension(kernel num, output width * output height)
+        self.b : layer's bias - 3 dimension(kernel num, output width, output height)
         '''
         if self.weights is None and self.bias is None:
             self.weights = np.random.rand(self.knum, self.input_channels, self.ksize, self.ksize) - 0.5
-            self.bias = np.random.rand(self.knum) - 0.5
+            self.bias = np.random.rand(self.knum, int((np.array(args[0]).shape[1] + 2*self.padding_size - self.ksize)/self.stride+1), int((np.array(args[0]).shape[2] + 2*self.padding_size - self.ksize)/self.stride+1)) - 0.5
         return self.forward(args[0])
 
     def forward(self, input):
+        '''
+        zero pad -> transfer img to matrix -> convolution(dot product) -> reshape matrix to tensor
+        '''
         input = np.array(input)
         self.matrix_weights = np.reshape(self.weights, (self.knum, -1)).T
         npad = ((0, 0), (self.padding_size, self.padding_size), (self.padding_size, self.padding_size))
@@ -55,24 +59,21 @@ class conv(object):
 
         conv_out = np.dot(self.matrix_input, self.matrix_weights).T
         conv_out = np.reshape(conv_out, (self.knum, int((input.shape[1] + 2*self.padding_size - self.ksize)/self.stride+1), (int)((input.shape[2] + 2*self.padding_size - self.ksize)/self.stride+1)))
-        for c in range(self.knum):
-            conv_out[c] += self.bias[c]
+        conv_out += self.bias
 
         return conv_out
 
     #nn 에서 backward랑 같은 기능. 다음 gradient를 위한 계산
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer):
         self.gradient = gradient
         conv_gradient = np.reshape(self.gradient, (self.knum, -1)).T
         w_graidient = np.reshape(np.dot(self.matrix_input.T, conv_gradient).T, (-1))
-        w_graidient =  np.reshape(w_graidient, self.weights.shape)
+        w_graidient = np.reshape(w_graidient, self.weights.shape)
         # update weights here
-        self.weights -= w_graidient * 0.01
-        self.bias -= np.sum(np.sum(gradient, axis=1), axis=1)
+        self.dw, self.db = optimizer(w_graidient, gradient)
 
         padding_gradient = np.dot(conv_gradient, self.matrix_weights.T)
         next_gradient = np.zeros(self.padding_input.shape)
-
 
         index=0
         for h in range(0,next_gradient.shape[1] - self.ksize+1, self.stride):
@@ -84,9 +85,6 @@ class conv(object):
         return next_dEd
 
     #Conv 의 weights 와 bias update
-    def update(self, learning_rate = 0.01):
-        self.weights -= self.w_graidient * learning_rate
-        self.bias -= self.bias * learning_rate  # bias를 0.01만큼 계속 감소시킴??
-
-        self.w_graidient = np.zeros(self.weights.shape)
-        self.bias_graidnet = np.zeros(self.bias.shape)
+    def update(self):
+        self.weights -= self.dw
+        self.bias -= self.db

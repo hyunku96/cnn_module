@@ -23,5 +23,5 @@ class dropout:
         self.dcg.append(tmp)
         return mask
 
-    def backward(self, mask, gradient):
+    def backward(self, mask, gradient, optimizer=None):
         return mask * gradient

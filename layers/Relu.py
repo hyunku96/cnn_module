@@ -18,6 +18,6 @@ class relu:
         self.dcg.append(tmp)
         return np.maximum(0, data)
 
-    def backward(self, input, gradient):
+    def backward(self, input, gradient, optimizer=None):
         gradient[input < 0] = 0
         return gradient
